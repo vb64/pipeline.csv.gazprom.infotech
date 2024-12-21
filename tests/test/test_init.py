@@ -2,13 +2,16 @@
 
 make test T=test_init.py
 """
-from pipeline_gazprom_infotech.ipl import Infotech
-from pipeline_gazprom_infotech.codes import Tube as TubeType
+from pipeline_gazprom_infotech.ipl import Infotech, LineObj as LineObjAttr
+from pipeline_gazprom_infotech.codes import Tube as TubeType, Feature
 
 from pipeline_csv.csvfile.row import Row
 from pipeline_csv.csvfile.tubes import Tube
+from pipeline_csv.csvfile.defect import Defect
 from pipeline_csv.csvfile import Stream
-from pipeline_csv import TypeHorWeld
+from pipeline_csv import TypeHorWeld, DefektSide
+
+from pipeline_csv.oegiv import Row as CsvRow, TypeDefekt, TypeMarker, File as CsvFile
 
 from . import TestBase
 
@@ -71,6 +74,37 @@ class TestInit(TestBase):
 
         pipeline_csv_gazprom_infotech.pipe_type = save
 
+    def test_add_defect(self):
+        """Check add_defect function."""
+        from pipeline_csv_gazprom_infotech import add_defect
+
+        pipe = Tube(CsvRow.as_weld(100, custom_number='1'), Stream(), "")
+        row = CsvRow.as_defekt(
+          110,
+          TypeDefekt.CORROZ, DefektSide.UNKNOWN,
+          None, None, None, None, None, None, None, ""
+        )
+        assert add_defect(None, Defect(row, pipe), {}, {}, None) == 0
+
+    def test_add_lineobject(self):
+        """Check add_lineobject function."""
+        from pipeline_csv_gazprom_infotech import add_lineobject
+
+        xml = Infotech()
+        obj = CsvRow.as_lineobj(100, TypeMarker.OTVOD, "xxx", 0, "")
+        assert add_lineobject(xml, obj, {}, {}, None) == 0
+
+        obj.object_name = "xxx"
+        trans_dict = {
+          TypeMarker.OTVOD: Feature.OTVOD_VREZKA,
+        }
+
+        def custom_handler(xml_item, custom_data):
+            """Handle custom data."""
+            xml_item.attrib[LineObjAttr.Rem] = custom_data
+
+        assert add_lineobject(xml, obj, {}, trans_dict, custom_handler) == 1
+
     def test_pipe_type(self):
         """Check pipe_type function."""
         from pipeline_csv_gazprom_infotech import pipe_type
@@ -88,3 +122,33 @@ class TestInit(TestBase):
 
         pipe.seams = [Row.as_seam(101, TypeHorWeld.UNKNOWN, None, None)]
         assert pipe_type(pipe) == TubeType.UNKNOWN
+
+        pipe.seams = [Row.as_seam(101, TypeHorWeld.SPIRAL, None, None)]
+        assert pipe_type(pipe) == TubeType.SPIRAL
+
+        pipe.seams = [
+          Row.as_seam(101, TypeHorWeld.HORIZONTAL, None, None),
+          Row.as_seam(102, TypeHorWeld.HORIZONTAL, None, None),
+        ]
+        assert pipe_type(pipe) == TubeType.DVUSHOV
+
+    def test_translate(self):
+        """Check translate function."""
+        from pipeline_csv_gazprom_infotech import translate
+
+        csv_data = CsvFile.from_file(self.fixture("iv.csv"), diameter=1400)
+        xml = Infotech()
+        ldict = {
+          TypeMarker.OTVOD: Feature.OTVOD_VREZKA,
+          TypeMarker.MARKER: Feature.MARKER,
+          TypeMarker.MAGNET: Feature.MARKER_MAGN,
+          TypeMarker.TROYNIK: Feature.TROYNIK,
+          TypeMarker.VALVE: Feature.VALVE,
+        }
+        ddict = {
+          TypeDefekt.CORROZ: Feature.CORROZ,
+          TypeDefekt.MECHANIC: Feature.MECHANICAL_DEFEKT,
+          TypeDefekt.DENT: Feature.DENT,
+        }
+
+        assert translate(csv_data, xml, ldict, ddict, None, None) == (41, 64, 5)
