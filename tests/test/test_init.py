@@ -2,15 +2,15 @@
 
 make test T=test_init.py
 """
-from pipeline_gazprom_infotech.ipl import Infotech
-from pipeline_gazprom_infotech.codes import Tube as TubeType
+from pipeline_gazprom_infotech.ipl import Infotech, LineObj as LineObjAttr
+from pipeline_gazprom_infotech.codes import Tube as TubeType, Feature
 
 from pipeline_csv.csvfile.row import Row
 from pipeline_csv.csvfile.tubes import Tube
 from pipeline_csv.csvfile.defect import Defect
 from pipeline_csv.csvfile import Stream
 from pipeline_csv import TypeHorWeld, DefektSide
-from pipeline_csv.oegiv import Row as CsvRow, TypeDefekt
+from pipeline_csv.oegiv import Row as CsvRow, TypeDefekt, TypeMarker
 
 from . import TestBase
 
@@ -84,6 +84,25 @@ class TestInit(TestBase):
           None, None, None, None, None, None, None, ""
         )
         assert add_defect(None, Defect(row, pipe), {}, {}, None) == 0
+
+    def test_add_lineobject(self):
+        """Check add_lineobject function."""
+        from pipeline_csv_gazprom_infotech import add_lineobject
+
+        xml = Infotech()
+        obj = CsvRow.as_lineobj(100, TypeMarker.OTVOD, "xxx", 0, "")
+        assert add_lineobject(xml, obj, {}, {}, None) == 0
+
+        obj.object_name = "xxx"
+        trans_dict = {
+          TypeMarker.OTVOD: Feature.OTVOD_VREZKA,
+        }
+
+        def custom_handler(xml_item, custom_data):
+            """Handle custom data."""
+            xml_item.attrib[LineObjAttr.Rem] = custom_data
+
+        assert add_lineobject(xml, obj, {}, trans_dict, custom_handler) == 1
 
     def test_pipe_type(self):
         """Check pipe_type function."""
