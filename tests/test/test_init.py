@@ -123,6 +123,15 @@ class TestInit(TestBase):
         pipe.seams = [Row.as_seam(101, TypeHorWeld.UNKNOWN, None, None)]
         assert pipe_type(pipe) == TubeType.UNKNOWN
 
+        pipe.seams = [Row.as_seam(101, TypeHorWeld.SPIRAL, None, None)]
+        assert pipe_type(pipe) == TubeType.SPIRAL
+
+        pipe.seams = [
+          Row.as_seam(101, TypeHorWeld.HORIZONTAL, None, None),
+          Row.as_seam(102, TypeHorWeld.HORIZONTAL, None, None),
+        ]
+        assert pipe_type(pipe) == TubeType.DVUSHOV
+
     def test_translate(self):
         """Check translate function."""
         from pipeline_csv_gazprom_infotech import translate
