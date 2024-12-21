@@ -1,0 +1,4 @@
+??.12.2024 ver.1.0
+------------------
+
++ Library for convert pipeline.csv file to Infotech XML.
