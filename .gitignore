@@ -1,0 +1,7 @@
+__pycache__
+*.log
+.coverage
+htmlcov/*
+venv*
+dist/
+*.egg-info/

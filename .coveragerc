@@ -1,0 +1,6 @@
+[run]
+branch = True
+source = pipeline_csv_gazprom_infotech/
+
+[html]
+directory = htmlcov
