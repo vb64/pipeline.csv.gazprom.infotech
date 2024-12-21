@@ -10,7 +10,8 @@ from pipeline_csv.csvfile.tubes import Tube
 from pipeline_csv.csvfile.defect import Defect
 from pipeline_csv.csvfile import Stream
 from pipeline_csv import TypeHorWeld, DefektSide
-from pipeline_csv.oegiv import Row as CsvRow, TypeDefekt, TypeMarker
+
+from pipeline_csv.oegiv import Row as CsvRow, TypeDefekt, TypeMarker, File as CsvFile
 
 from . import TestBase
 
@@ -121,3 +122,14 @@ class TestInit(TestBase):
 
         pipe.seams = [Row.as_seam(101, TypeHorWeld.UNKNOWN, None, None)]
         assert pipe_type(pipe) == TubeType.UNKNOWN
+
+    def test_translate(self):
+        """Check translate function."""
+        from pipeline_csv_gazprom_infotech import translate
+
+        csv_data = CsvFile.from_file(self.fixture("iv.csv"), diameter=1400)
+        xml = Infotech()
+        ldict = {}
+        ddict = {}
+
+        assert translate(csv_data, xml, ldict, ddict, None, None) == (41, 0, 0)
