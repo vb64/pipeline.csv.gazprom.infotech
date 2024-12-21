@@ -152,3 +152,21 @@ class TestInit(TestBase):
         }
 
         assert translate(csv_data, xml, ldict, ddict, None, None) == (41, 64, 5)
+
+    def test_get_diam_change(self):
+        """Check get_diam_change function."""
+        from pipeline_csv_gazprom_infotech import get_diam_change
+
+        pipe = Tube(Row.as_weld(100), Stream(), "")
+        pipe.add_object(Row.as_diam(
+          pipe.dist + 10,
+          1000, 1200
+        ))
+        assert get_diam_change(pipe) is not None
+
+        pipe = Tube(Row.as_weld(100), Stream(), "")
+        pipe.add_object(Row.as_diam(
+          pipe.dist + 10,
+          None, 1200
+        ))
+        assert get_diam_change(pipe) is None
