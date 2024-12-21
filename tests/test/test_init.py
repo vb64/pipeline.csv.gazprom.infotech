@@ -129,7 +129,17 @@ class TestInit(TestBase):
 
         csv_data = CsvFile.from_file(self.fixture("iv.csv"), diameter=1400)
         xml = Infotech()
-        ldict = {}
-        ddict = {}
+        ldict = {
+          TypeMarker.OTVOD: Feature.OTVOD_VREZKA,
+          TypeMarker.MARKER: Feature.MARKER,
+          TypeMarker.MAGNET: Feature.MARKER_MAGN,
+          TypeMarker.TROYNIK: Feature.TROYNIK,
+          TypeMarker.VALVE: Feature.VALVE,
+        }
+        ddict = {
+          TypeDefekt.CORROZ: Feature.CORROZ,
+          TypeDefekt.MECHANIC: Feature.MECHANICAL_DEFEKT,
+          TypeDefekt.DENT: Feature.DENT,
+        }
 
-        assert translate(csv_data, xml, ldict, ddict, None, None) == (41, 0, 0)
+        assert translate(csv_data, xml, ldict, ddict, None, None) == (41, 64, 5)
