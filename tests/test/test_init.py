@@ -7,8 +7,10 @@ from pipeline_gazprom_infotech.codes import Tube as TubeType
 
 from pipeline_csv.csvfile.row import Row
 from pipeline_csv.csvfile.tubes import Tube
+from pipeline_csv.csvfile.defect import Defect
 from pipeline_csv.csvfile import Stream
-from pipeline_csv import TypeHorWeld
+from pipeline_csv import TypeHorWeld, DefektSide
+from pipeline_csv.oegiv import Row as CsvRow, TypeDefekt
 
 from . import TestBase
 
@@ -70,6 +72,18 @@ class TestInit(TestBase):
         assert len(obj_dict) > 0
 
         pipeline_csv_gazprom_infotech.pipe_type = save
+
+    def test_add_defect(self):
+        """Check add_defect function."""
+        from pipeline_csv_gazprom_infotech import add_defect
+
+        pipe = Tube(CsvRow.as_weld(100, custom_number='1'), Stream(), "")
+        row = CsvRow.as_defekt(
+          110,
+          TypeDefekt.CORROZ, DefektSide.UNKNOWN,
+          None, None, None, None, None, None, None, ""
+        )
+        assert add_defect(None, Defect(row, pipe), {}, {}, None) == 0
 
     def test_pipe_type(self):
         """Check pipe_type function."""
