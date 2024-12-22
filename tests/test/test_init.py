@@ -2,7 +2,7 @@
 
 make test T=test_init.py
 """
-from pipeline_gazprom_infotech.ipl import Infotech, LineObj as LineObjAttr
+from pipeline_gazprom_infotech.ipl import Infotech, LineObj as LineObjAttr, Defect as DefectAttr
 from pipeline_gazprom_infotech.codes import Tube as TubeType, Feature
 
 from pipeline_csv.csvfile.row import Row
@@ -19,18 +19,36 @@ from . import TestBase
 class TestInit(TestBase):
     """Module __init__.py."""
 
+    def setUp(self):
+        """Mock used device and port."""
+        super().setUp()
+        self.xml = Infotech()
+
     def test_get_diam_infotech(self):
         """Check get_diam_infotech function."""
         from pipeline_csv_gazprom_infotech import get_diam_infotech
+        from pipeline_csv_gazprom_infotech.diam import DIAM_DECREASE
 
-        assert get_diam_infotech(1, 2, {}) is None
+        assert get_diam_infotech(1, 2, []) is None
+        assert get_diam_infotech(1400, 1200, DIAM_DECREASE) is not None
 
     def test_add_diam_change(self):
         """Check add_diam_change function."""
         from pipeline_csv_gazprom_infotech import add_diam_change
 
+        type_dict = {}
+
         row = Row.as_diam(100, 1400, 100)
-        assert add_diam_change(None, row, {}) == 0
+        assert add_diam_change(self.xml, row, type_dict) == 0
+        assert not type_dict
+
+        row = Row.as_diam(100, 1200, 1400)
+        assert add_diam_change(self.xml, row, type_dict) == 1
+        assert len(type_dict) == 1
+
+        row = Row.as_diam(500, 1200, 1400)
+        assert add_diam_change(self.xml, row, type_dict) == 1
+        assert len(type_dict) == 1
 
     def test_get_seam2(self):
         """Check get_seam2 function."""
@@ -62,15 +80,24 @@ class TestInit(TestBase):
         save = pipeline_csv_gazprom_infotech.pipe_type
         pipeline_csv_gazprom_infotech.pipe_type = lambda pipe: TubeType.ODNOSHOV
 
-        xml = Infotech()
         pipe = Tube(Row.as_weld(100, custom_number='1'), Stream(), "")
         pipe.thick = '105'
         pipe.length = 100
         obj_dict = {}
         assert pipeline_csv_gazprom_infotech.add_pipe(
-          pipe, xml, obj_dict, ldict, ddict, None, None
+          pipe, self.xml, obj_dict, ldict, ddict, None, None
         ) is not None
         assert len(obj_dict) > 0
+
+        pipeline_csv_gazprom_infotech.pipe_type = lambda pipe: TubeType.SPIRAL
+        assert pipeline_csv_gazprom_infotech.add_pipe(
+          pipe, self.xml, obj_dict, ldict, ddict, None, None
+        ) is not None
+
+        pipe.add_object(Row.as_diam(200, 1200, 1400))
+        assert pipeline_csv_gazprom_infotech.add_pipe(
+          pipe, self.xml, obj_dict, ldict, ddict, None, None
+        ) is not None
 
         pipeline_csv_gazprom_infotech.pipe_type = save
 
@@ -84,15 +111,29 @@ class TestInit(TestBase):
           TypeDefekt.CORROZ, DefektSide.UNKNOWN,
           None, None, None, None, None, None, None, ""
         )
-        assert add_defect(None, Defect(row, pipe), {}, {}, None) == 0
+        assert add_defect(self.xml, Defect(row, pipe), {}, {}, None) == 0
+
+        ddict = {
+          TypeDefekt.CORROZ: Feature.CORROZ,
+        }
+        row = CsvRow.as_defekt(
+          110,
+          TypeDefekt.CORROZ, DefektSide.UNKNOWN,
+          '10', '10', '10', None, None, None, None, "", custom_data='xxx'
+        )
+
+        def custom_handler(xml_item, custom_data):
+            """Handle custom data."""
+            xml_item.attrib[DefectAttr.Rem] = custom_data
+
+        assert add_defect(self.xml, Defect(row, pipe), {}, ddict, custom_handler) == 1
 
     def test_add_lineobject(self):
         """Check add_lineobject function."""
         from pipeline_csv_gazprom_infotech import add_lineobject
 
-        xml = Infotech()
         obj = CsvRow.as_lineobj(100, TypeMarker.OTVOD, "xxx", 0, "")
-        assert add_lineobject(xml, obj, {}, {}, None) == 0
+        assert add_lineobject(self.xml, obj, {}, {}, None) == 0
 
         obj.object_name = "xxx"
         trans_dict = {
@@ -103,7 +144,7 @@ class TestInit(TestBase):
             """Handle custom data."""
             xml_item.attrib[LineObjAttr.Rem] = custom_data
 
-        assert add_lineobject(xml, obj, {}, trans_dict, custom_handler) == 1
+        assert add_lineobject(self.xml, obj, {}, trans_dict, custom_handler) == 1
 
     def test_pipe_type(self):
         """Check pipe_type function."""
@@ -137,7 +178,6 @@ class TestInit(TestBase):
         from pipeline_csv_gazprom_infotech import translate
 
         csv_data = CsvFile.from_file(self.fixture("iv.csv"), diameter=1400)
-        xml = Infotech()
         ldict = {
           TypeMarker.OTVOD: Feature.OTVOD_VREZKA,
           TypeMarker.MARKER: Feature.MARKER,
@@ -151,4 +191,35 @@ class TestInit(TestBase):
           TypeDefekt.DENT: Feature.DENT,
         }
 
-        assert translate(csv_data, xml, ldict, ddict, None, None) == (41, 64, 5)
+        assert translate(csv_data, self.xml, ldict, ddict, None, None) == (41, 64, 5)
+
+    def test_translate_zerolength_pipe(self):
+        """Check translate function with zerolength pipe."""
+        from pipeline_csv_gazprom_infotech import translate
+
+        csv_data = CsvFile()
+        csv_data.data = [
+          Row.as_weld(100),
+          Row.as_thick(101, 105),
+          Row.as_weld(200),
+          Row.as_weld(200),
+        ]
+        assert translate(csv_data, self.xml, {}, {}, None, None) == (1, 0, 0)
+
+    def test_get_diam_change(self):
+        """Check get_diam_change function."""
+        from pipeline_csv_gazprom_infotech import get_diam_change
+
+        pipe = Tube(Row.as_weld(100), Stream(), "")
+        pipe.add_object(Row.as_diam(
+          pipe.dist + 10,
+          1000, 1200
+        ))
+        assert get_diam_change(pipe) is not None
+
+        pipe = Tube(Row.as_weld(100), Stream(), "")
+        pipe.add_object(Row.as_diam(
+          pipe.dist + 10,
+          None, 1200
+        ))
+        assert get_diam_change(pipe) is None
