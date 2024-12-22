@@ -193,6 +193,19 @@ class TestInit(TestBase):
 
         assert translate(csv_data, self.xml, ldict, ddict, None, None) == (41, 64, 5)
 
+    def test_translate_zerolength_pipe(self):
+        """Check translate function with zerolength pipe."""
+        from pipeline_csv_gazprom_infotech import translate
+
+        csv_data = CsvFile()
+        csv_data.data = [
+          Row.as_weld(100),
+          Row.as_thick(101, 105),
+          Row.as_weld(200),
+          Row.as_weld(200),
+        ]
+        assert translate(csv_data, self.xml, {}, {}, None, None) == (1, 0, 0)
+
     def test_get_diam_change(self):
         """Check get_diam_change function."""
         from pipeline_csv_gazprom_infotech import get_diam_change
