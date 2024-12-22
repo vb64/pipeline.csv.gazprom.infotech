@@ -89,6 +89,16 @@ class TestInit(TestBase):
         ) is not None
         assert len(obj_dict) > 0
 
+        pipeline_csv_gazprom_infotech.pipe_type = lambda pipe: TubeType.SPIRAL
+        assert pipeline_csv_gazprom_infotech.add_pipe(
+          pipe, self.xml, obj_dict, ldict, ddict, None, None
+        ) is not None
+
+        pipe.add_object(Row.as_diam(200, 1200, 1400))
+        assert pipeline_csv_gazprom_infotech.add_pipe(
+          pipe, self.xml, obj_dict, ldict, ddict, None, None
+        ) is not None
+
         pipeline_csv_gazprom_infotech.pipe_type = save
 
     def test_add_defect(self):
