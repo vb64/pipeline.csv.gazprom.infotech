@@ -60,9 +60,9 @@ def it_size(size):
     return str(int(float(size)))
 
 
-def get_diam_infotech(start, end, diam_dict):
+def get_diam_infotech(start, end, diam_list):
     """Find diam change in dict."""
-    for diam in diam_dict:
+    for diam in diam_list:
         data = diam.get_code(start, end)
         if data is not None:
             return data
@@ -74,12 +74,12 @@ def add_diam_change(xml, diam_row, obj_dict):
     """Add diam change objrcy to IPL xml."""
     start = int(diam_row.depth_min)
     end = int(diam_row.depth_max)
-    diam_dict = DIAM_INCREASE
+    diam_list = DIAM_INCREASE
 
     if start > end:
-        diam_dict = DIAM_DECREASE
+        diam_list = DIAM_DECREASE
 
-    diam = get_diam_infotech(start, end, diam_dict)
+    diam = get_diam_infotech(start, end, diam_list)
     if diam is None:
         return 0
 

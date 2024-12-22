@@ -22,8 +22,10 @@ class TestInit(TestBase):
     def test_get_diam_infotech(self):
         """Check get_diam_infotech function."""
         from pipeline_csv_gazprom_infotech import get_diam_infotech
+        from pipeline_csv_gazprom_infotech.diam import DIAM_DECREASE
 
-        assert get_diam_infotech(1, 2, {}) is None
+        assert get_diam_infotech(1, 2, []) is None
+        assert get_diam_infotech(1400, 1200, DIAM_DECREASE) is not None
 
     def test_add_diam_change(self):
         """Check add_diam_change function."""
