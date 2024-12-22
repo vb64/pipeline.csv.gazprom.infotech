@@ -31,8 +31,20 @@ class TestInit(TestBase):
         """Check add_diam_change function."""
         from pipeline_csv_gazprom_infotech import add_diam_change
 
+        xml = Infotech()
+        type_dict = {}
+
         row = Row.as_diam(100, 1400, 100)
-        assert add_diam_change(None, row, {}) == 0
+        assert add_diam_change(xml, row, type_dict) == 0
+        assert not type_dict
+
+        row = Row.as_diam(100, 1200, 1400)
+        assert add_diam_change(xml, row, type_dict) == 1
+        assert len(type_dict) == 1
+
+        row = Row.as_diam(500, 1200, 1400)
+        assert add_diam_change(xml, row, type_dict) == 1
+        assert len(type_dict) == 1
 
     def test_get_seam2(self):
         """Check get_seam2 function."""
