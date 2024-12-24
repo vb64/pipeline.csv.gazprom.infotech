@@ -31,7 +31,7 @@ def it_orientation(orient):
     """Convert pipeline_csv.Orientation to Infotech format."""
     if orient is None:
         return ""
-    return str(round(orient.as_hour_float, 1)).replace('.', ',')
+    return str(round(orient.as_hour_float % 12, 1)).replace('.', ',')
 
 
 def get_diam_change(pipe):
