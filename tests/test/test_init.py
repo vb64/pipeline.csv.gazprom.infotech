@@ -9,6 +9,7 @@ from pipeline_csv.csvfile.row import Row
 from pipeline_csv.csvfile.tubes import Tube
 from pipeline_csv.csvfile.defect import Defect
 from pipeline_csv.csvfile import Stream
+from pipeline_csv.orientation import Orientation
 from pipeline_csv import TypeHorWeld, DefektSide
 
 from pipeline_csv.oegiv import Row as CsvRow, TypeDefekt, TypeMarker, File as CsvFile
@@ -23,6 +24,16 @@ class TestInit(TestBase):
         """Mock used device and port."""
         super().setUp()
         self.xml = Infotech()
+
+    def test_it_orientation(self):
+        """Check it_orientation function."""
+        from pipeline_csv_gazprom_infotech import it_orientation
+
+        orient = Orientation.from_hour_float(11.2)
+        assert it_orientation(orient) == "11,2"
+
+        orient = Orientation.from_hour_float(12.2)
+        assert it_orientation(orient) == "0,2"
 
     def test_get_diam_infotech(self):
         """Check get_diam_infotech function."""
