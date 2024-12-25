@@ -1,2 +1,2 @@
 pipeline-csv==1.12
-pipeline-gazprom-infotech==1.2
+pipeline-gazprom-infotech==1.3
