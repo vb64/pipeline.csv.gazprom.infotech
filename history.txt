@@ -1,7 +1,7 @@
 18.10.2025 ver.1.3
 ------------------
 
-* Require pipeline-csv version >= 1.20.
+* Support pipeline-csv version >= 1.20.
 
 25.12.2024 ver.1.2
 ------------------
