@@ -1,3 +1,5 @@
+* Require pipeline-csv version >= 1.20.
+
 25.12.2024 ver.1.2
 ------------------
 

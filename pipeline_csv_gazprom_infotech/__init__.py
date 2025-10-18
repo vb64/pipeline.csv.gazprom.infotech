@@ -120,8 +120,8 @@ def add_defect(xml, obj, obj_dict, defect_table, custom_handler):
       # DefectAttr.Method: "",
     }
     defekt = xml.add_defekt(attribs)
-    if obj.custom_data and custom_handler:
-        custom_handler(defekt, obj.custom_data)
+    if obj.row.custom_data and custom_handler:
+        custom_handler(defekt, obj.row.custom_data)
 
     if dtype not in obj_dict:
         obj_dict[dtype] = NAME[dtype]
