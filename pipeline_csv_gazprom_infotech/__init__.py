@@ -60,6 +60,13 @@ def it_size(size):
     return str(int(float(size)))
 
 
+def it_depth(depth):
+    """Convert depth in %% to Infotech format."""
+    if not depth:
+        return ""
+    return depth
+
+
 def get_diam_infotech(start, end, diam_list):
     """Find diam change in dict."""
     for diam in diam_list:
@@ -108,8 +115,8 @@ def add_defect(xml, obj, obj_dict, defect_table, custom_handler):
       DefectAttr.Dist: it_dist(obj.row.dist),
       DefectAttr.LOtch: it_size(obj.length),
       DefectAttr.WOtch: it_size(obj.row.width),
-      DefectAttr.Vmin: str(obj.row.depth_min),
-      DefectAttr.Vmax: str(obj.row.depth_max),
+      DefectAttr.Vmin: it_depth(obj.row.depth_min),
+      DefectAttr.Vmax: it_depth(obj.row.depth_max),
       DefectAttr.Orient1: it_orientation(obj.orient1),
       DefectAttr.Orient2: it_orientation(obj.orient2),
       DefectAttr.Rem: obj.row.comments,
