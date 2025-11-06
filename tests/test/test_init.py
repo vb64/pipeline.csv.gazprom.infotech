@@ -234,3 +234,9 @@ class TestInit(TestBase):
           None, 1200
         ))
         assert get_diam_change(pipe) is None
+
+    def test_it_depth(self):
+        """Check it_depth function."""
+        from pipeline_csv_gazprom_infotech import it_depth
+
+        assert it_depth(None) == ""

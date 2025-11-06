@@ -64,7 +64,7 @@ def it_depth(depth):
     """Convert depth in %% to Infotech format."""
     if not depth:
         return ""
-    return depth
+    return str(depth)
 
 
 def get_diam_infotech(start, end, diam_list):
